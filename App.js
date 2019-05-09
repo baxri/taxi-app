@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View, TextInput } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 const instructions = Platform.select({
@@ -27,7 +27,8 @@ export default class App extends Component {
     this.state = {
       latitude: 0,
       longitute: 0,
-      error: null,
+      error: "",
+      destination: "",
     }
   }
 
@@ -47,38 +48,48 @@ export default class App extends Component {
     )
   }
 
+  onChangeDestination = (destination) => {
+
+
+
+  }
+
   render() {
     return (
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={{
-          // latitude: this.state.longitute,
-          // longitude: this.state.latitude,
-          // latitudeDelta: 0.015,
-          // longitudeDelta: 0.012,
-        }}
-        showsUserLocation={true}
-      >
-      </MapView>
+      <View style={styles.container}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: this.state.longitute,
+            longitude: this.state.latitude,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.0121,
+          }}
+          showsUserLocation={true}
+        >
+        </MapView>
+        <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.destination} onChangeText={destination => this.onChangeDestination(destination)} />
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  destinationInput: {
+    height: 40,
+    borderWidth: 1,
+    marginTop: 50, 
+    marginLeft: 5,
+    marginRight: 5,
+    paddingLeft: 5,
+    backgroundColor: "white",
+
+  },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    ...StyleSheet.absoluteFillObject
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  map: {
+    ...StyleSheet.absoluteFillObject
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+
 });
