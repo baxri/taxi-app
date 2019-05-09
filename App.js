@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -21,8 +21,30 @@ const GOOGLE_API_KEY = 'AIzaSyA2xyrDSw6pndpokaymwV2eW6d_JuT4-yo';
 
 export default class App extends Component {
 
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      latitude: 0,
+      longitute: 0,
+      error: null,
+    }
+  }
+
+
   componentDidMount() {
-    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+
+        this.setState({
+          latitude: position.coords.latitude,
+          longitute: position.coords.longitude,
+          error: null,
+        })
+      },
+      (error) => { this.setState({ error: error.message }) },
+      { enableHighAccuracy: true, timeout: 30000 }
+    )
   }
 
   render() {
@@ -30,12 +52,14 @@ export default class App extends Component {
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          // latitude: this.state.longitute,
+          // longitude: this.state.latitude,
+          // latitudeDelta: 0.015,
+          // longitudeDelta: 0.012,
         }}
-      />
+        showsUserLocation={true}
+      >
+      </MapView>
     );
   }
 }
