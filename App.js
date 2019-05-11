@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, TextInput } from 'react-native';
+import { Platform, StyleSheet, Text, View, TextInput, Dimensions, TouchableHighlight, Keyboard } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import apiKey from './apiKey';
 import axios from 'axios';
 import _ from 'lodash';
+import PolyLine from '@mapbox/polyline';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -23,6 +24,7 @@ export default class App extends Component {
       error: "",
       destination: "",
       predictions: [],
+      pointCoords: [],
     }
   }
 
@@ -33,47 +35,86 @@ export default class App extends Component {
         this.setState({
           latitude: position.coords.latitude,
           longitute: position.coords.longitude,
+
           error: null,
         })
+
+        // this.getRouteDirection();
       },
       (error) => { this.setState({ error: error.message }) },
       { enableHighAccuracy: true, timeout: 30000 }
     )
+
   }
 
+
   onChangeDestination = async (destination) => {
+
+    this.setState({ destination });
+
     const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&sessiontoken=1234567890&location=${this.state.latitude},${this.state.longitute}&radius=2`;
     const { data } = await axios.get(apiUrl);
 
     this.setState({
-      destination,
       predictions: data.predictions
     })
+  }
 
-    console.log(data);
+  getRouteDirection = async (placeId, description) => {
+    try {
+      const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitute}&destination=place_id:${placeId}&key=${apiKey}`;
+      const { data } = await axios.get(apiUrl);
+      const points = PolyLine.decode(data.routes[0].overview_polyline.points);
+      const pointCoords = points.map(point => { return { latitude: point[0], longitude: point[1] } });
+      this.setState({ pointCoords, predictions: [], destination: description });
+      Keyboard.dismiss();
 
+      this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   render() {
 
-    const predictions = this.state.predictions.map(prediction => <Text style={styles.suggestions} key={prediction.id}>{prediction.description}</Text>);
+    console.log(this.state.predictions)
 
-    console.log(predictions)
+
+    let marker = null;
+
+    if (this.state.pointCoords.length > 0) {
+      marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
+    }
+
+    const predictions = this.state.predictions.map(prediction => <TouchableHighlight onPress={() => this.getRouteDirection(prediction.place_id, prediction.structured_formatting.main_text)} key={prediction.id}>
+      <View>
+        <Text style={styles.suggestions}>{prediction.description}</Text>
+      </View>
+    </TouchableHighlight>);
+
+
+    const { width, height } = Dimensions.get('window');
 
     return (
       <View style={styles.container}>
         <MapView
+          ref={map => {
+            this.map = map;
+          }}
           style={styles.map}
-          initialRegion={{
-            latitude: this.state.longitute,
-            longitude: this.state.latitude,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
+          region={{
+            latitude: this.state.latitude,
+            longitude: this.state.longitute,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1 * (width / height),
           }}
           showsUserLocation={true}
         >
+          <MapView.Polyline coordinates={this.state.pointCoords} strokeWidth={4} strokeColor="red" />
+          {marker && marker}
         </MapView>
-        <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.destination} onChangeText={_.debounce(this.onChangeDestination, 1000)} />
+        {/* <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={_.debounce(this.onChangeDestination, 1000)} /> */}
+        <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={this.onChangeDestination} />
         {predictions}
       </View>
     );
