@@ -1,0 +1,1 @@
+export default 'AIzaSyA2xyrDSw6pndpokaymwV2eW6d_JuT4-yo';
