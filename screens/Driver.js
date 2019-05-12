@@ -60,6 +60,9 @@ export default class Driver extends Component {
       socket.emit("lookingForPassengers", this.state.routeResponse);
 
       socket.on("taxiRequest", routeResponse => {
+
+        alert('FOUND!');
+
         this.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
         this.setState({ lookingForPassengers: false, buttonText: "PASSENGER FOUND!" });
       });
