@@ -5,6 +5,7 @@ import apiKey from '../apiKey';
 import axios from 'axios';
 import _ from 'lodash';
 import PolyLine from '@mapbox/polyline';
+import socketIO from "socket.io-client";
 
 export default class Passenger extends Component {
 
@@ -18,6 +19,8 @@ export default class Passenger extends Component {
             destination: "",
             predictions: [],
             pointCoords: [],
+
+            routeResponse: null,
         }
     }
 
@@ -56,13 +59,23 @@ export default class Passenger extends Component {
             const { data } = await axios.get(apiUrl);
             const points = PolyLine.decode(data.routes[0].overview_polyline.points);
             const pointCoords = points.map(point => { return { latitude: point[0], longitude: point[1] } });
-            this.setState({ pointCoords, predictions: [], destination: description });
+            this.setState({ pointCoords, predictions: [], destination: description, routeResponse: data });
             Keyboard.dismiss();
 
             this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
         } catch (err) {
             alert(err.message)
         }
+    }
+
+    requestDriver = async () => {
+
+        const socket = socketIO.connect("http://192.168.0.102:3000");
+
+        socket.on("connect", () => {
+            socket.emit("taxiRequest", this.state.routeResponse);
+        });
+
     }
 
     render() {
@@ -72,7 +85,7 @@ export default class Passenger extends Component {
 
         if (this.state.pointCoords.length > 0) {
             marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
-            driverButton = <TouchableOpacity style={styles.bottomButton}>
+            driverButton = <TouchableOpacity onPress={() => this.requestDriver()} style={styles.bottomButton}>
                 <Text style={styles.bottomButtonText}>FIND DRIVER</Text>
             </TouchableOpacity>;
         }

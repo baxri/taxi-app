@@ -11,7 +11,7 @@ export default class App extends Component {
 
     this.state = {
       isDriver: false,
-      isPassenger: true
+      isPassenger: false
     }
   }
 
