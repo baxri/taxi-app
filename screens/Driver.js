@@ -64,7 +64,6 @@ export default class Driver extends Component {
         // BackgroundGeolocation.start(); //triggers start on start event
       // }
     });
-
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
