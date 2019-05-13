@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, TextInput, Dimensions, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
+import { Platform, StyleSheet, Text, View, TextInput, Dimensions, TouchableHighlight, TouchableOpacity, Keyboard, ActivityIndicator, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import apiKey from '../apiKey';
 import axios from 'axios';
@@ -20,6 +20,9 @@ export default class Passenger extends Component {
             predictions: [],
             pointCoords: [],
 
+            lookingForDriver: false,
+            driverIsOnTheWay: false,
+            driverLocation: { latitude: 0, longitude: 0 },
             routeResponse: null,
         }
     }
@@ -70,10 +73,19 @@ export default class Passenger extends Component {
 
     requestDriver = async () => {
 
+        this.setState({ lookingForDriver: true });
+
         const socket = socketIO.connect("http://192.168.0.102:3000");
 
         socket.on("connect", () => {
             socket.emit("taxiRequest", this.state.routeResponse);
+        });
+
+        socket.on("driverLocation", driverLocation => {
+            this.setState({ lookingForDriver: false, driverIsOnTheWay: true, driverLocation });
+            let pointCoords = [...this.state.pointCoords];
+            pointCoords.push(driverLocation);
+            this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
         });
 
     }
@@ -81,13 +93,21 @@ export default class Passenger extends Component {
     render() {
 
         let marker = null;
+        let markerDriver = null;
         let driverButton = null;
 
         if (this.state.pointCoords.length > 0) {
             marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
             driverButton = <TouchableOpacity onPress={() => this.requestDriver()} style={styles.bottomButton}>
-                <Text style={styles.bottomButtonText}>FIND DRIVER</Text>
+                <Text style={styles.bottomButtonText}>FREQUEST</Text>
+                <ActivityIndicator animating={this.state.lookingForDriver} size="large" />
             </TouchableOpacity>;
+        }
+
+        if (this.state.driverIsOnTheWay) {
+            markerDriver = <Marker coordinate={this.state.driverLocation}  >
+                <Image source={require('../car.png')} style={{ width: 40, height: 40 }} />
+            </Marker>
         }
 
         const predictions = this.state.predictions.map(prediction => <TouchableHighlight onPress={() => this.getRouteDirection(prediction.place_id, prediction.structured_formatting.main_text)} key={prediction.id}>
@@ -115,7 +135,8 @@ export default class Passenger extends Component {
                     showsUserLocation={true}
                 >
                     <MapView.Polyline coordinates={this.state.pointCoords} strokeWidth={4} strokeColor="red" />
-                    {marker && marker}
+                    {marker}
+                    {markerDriver}
                 </MapView>
                 {/* <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={_.debounce(this.onChangeDestination, 1000)} /> */}
                 <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={this.onChangeDestination} />

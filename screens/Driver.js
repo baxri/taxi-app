@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, Keyboard } from 'react-native';
+import { Platform, Linking, ActivityIndicator, StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, Keyboard } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import apiKey from '../apiKey';
 import axios from 'axios';
@@ -19,10 +19,13 @@ export default class Driver extends Component {
       pointCoords: [],
       lookingForPassengers: false,
       buttonText: "FIND PASSENGER",
+      passengerFound: false,
+      socket: null,
     }
   }
 
   componentDidMount() {
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         this.setState({
@@ -54,28 +57,45 @@ export default class Driver extends Component {
 
     this.setState({ lookingForPassengers: true });
 
-    const socket = socketIO.connect("http://192.168.0.102:3000");
+    this.socket = socketIO.connect("http://192.168.0.102:3000");
 
-    socket.on("connect", () => {
-      socket.emit("lookingForPassengers", this.state.routeResponse);
+    this.socket.on("connect", () => {
+      this.socket.emit("lookingForPassengers", this.state.routeResponse);
 
-      socket.on("taxiRequest", routeResponse => {
-
-        alert('FOUND!');
-
+      this.socket.on("taxiRequest", routeResponse => {
         this.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
-        this.setState({ lookingForPassengers: false, buttonText: "PASSENGER FOUND!" });
+        this.setState({ lookingForPassengers: false, passengerFound: true, buttonText: "ACCEPT RIDE?" });
       });
     });
 
   }
 
+  acceptPassenger = async () => {
+    this.socket.emit("driverLocation", {
+      latitude: this.state.latitude,
+      longitude: this.state.longitute,
+    });
+
+    const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
+
+    if (Platform.OS == 'ios') {
+      Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
+    } else {
+      Linking.openURL(`https://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`);
+    }
+  }
+
   render() {
 
     let marker = null;
+    let bottomButtonFunction = this.lookForPassengers;
 
     if (this.state.pointCoords.length > 0) {
       marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
+    }
+
+    if (this.state.passengerFound) {
+      bottomButtonFunction = this.acceptPassenger;
     }
 
     const { width, height } = Dimensions.get('window');
@@ -99,7 +119,7 @@ export default class Driver extends Component {
           {marker}
         </MapView>
 
-        <TouchableOpacity onPress={() => this.lookForPassengers()} style={styles.bottomButton}>
+        <TouchableOpacity onPress={() => bottomButtonFunction()} style={styles.bottomButton}>
           <Text style={styles.bottomButtonText}>{this.state.buttonText}</Text>
           <ActivityIndicator animating={this.state.lookingForPassengers} size="large" />
         </TouchableOpacity>
