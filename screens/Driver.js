@@ -66,7 +66,6 @@ export default class Driver extends Component {
     });
 
 
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         this.setState({
