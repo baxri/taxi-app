@@ -54,16 +54,6 @@ export default class Driver extends Component {
       }
     });
 
-    BackgroundGeolocation.checkStatus(status => {
-      // you don't need to check status before start (this is just the example)
-      // alert("checkStatus!");
-
-      if (!status.isRunning) {
-        BackgroundGeolocation.start(); //triggers start on start event
-      }
-
-    });
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         this.setState({
@@ -109,20 +99,25 @@ export default class Driver extends Component {
 
   acceptPassenger = async () => {
 
-    // BackgroundGeolocation.on('location', (location) => {
-
-    //   alert("accepted!");
-
-    //   this.socket.emit("driverLocation", {
-    //     latitude: location.latitude,
-    //     longitude: location.longitute,
-    //   });
-    // });
-
-    this.socket.emit("driverLocation", {
-      latitude: this.state.latitude,
-      longitude: this.state.longitute,
+    BackgroundGeolocation.on('location', (location) => {
+      this.socket.emit("driverLocation", {
+        latitude: location.latitude,
+        longitude: location.longitute,
+      });
     });
+
+    BackgroundGeolocation.checkStatus(status => {
+      // you don't need to check status before start (this is just the example)
+      // alert("checkStatus!");
+      if (!status.isRunning) {
+        BackgroundGeolocation.start(); //triggers start on start event
+      }
+    });
+
+    // this.socket.emit("driverLocation", {
+    //   latitude: this.state.latitude,
+    //   longitude: this.state.longitute,
+    // });
 
     // const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
 
