@@ -27,41 +27,42 @@ export default class Driver extends Component {
 
   componentDidMount() {
 
-    // BackgroundGeolocation.configure({
-    //   desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
-    //   stationaryRadius: 50,
-    //   distanceFilter: 50,
-    //   debug: false,
-    //   startOnBoot: false,
-    //   stopOnTerminate: true,
-    //   locationProvider: BackgroundGeolocation.ACTIVITY_PROVIDER,
-    //   interval: 10000,
-    //   fastestInterval: 5000,
-    //   activitiesInterval: 10000,
-    //   stopOnStillActivity: false,
-    // });
+    BackgroundGeolocation.configure({
+      desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
+      stationaryRadius: 50,
+      distanceFilter: 50,
+      debug: false,
+      startOnBoot: false,
+      stopOnTerminate: true,
+      locationProvider: BackgroundGeolocation.ACTIVITY_PROVIDER,
+      interval: 10000,
+      fastestInterval: 5000,
+      activitiesInterval: 10000,
+      stopOnStillActivity: false,
+    });
 
 
-    // BackgroundGeolocation.on('authorization', (status) => {
-    //   console.log('[INFO] BackgroundGeolocation authorization status: ' + status);
-    //   if (status !== BackgroundGeolocation.AUTHORIZED) {
-    //     // we need to set delay or otherwise alert may not be shown
-    //     setTimeout(() =>
-    //       Alert.alert('App requires location tracking permission', 'Would you like to open app settings?', [
-    //         { text: 'Yes', onPress: () => BackgroundGeolocation.showAppSettings() },
-    //         { text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel' }
-    //       ]), 1000);
-    //   }
-    // });
+    BackgroundGeolocation.on('authorization', (status) => {
+      console.log('[INFO] BackgroundGeolocation authorization status: ' + status);
+      if (status !== BackgroundGeolocation.AUTHORIZED) {
+        // we need to set delay or otherwise alert may not be shown
+        setTimeout(() =>
+          Alert.alert('App requires location tracking permission', 'Would you like to open app settings?', [
+            { text: 'Yes', onPress: () => BackgroundGeolocation.showAppSettings() },
+            { text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel' }
+          ]), 1000);
+      }
+    });
 
-    // BackgroundGeolocation.checkStatus(status => {
-    //   // you don't need to check status before start (this is just the example)
-    //   // alert("checkStatus!");
+    BackgroundGeolocation.checkStatus(status => {
+      // you don't need to check status before start (this is just the example)
+      // alert("checkStatus!");
 
-    //   // if (!status.isRunning) {
-    //     // BackgroundGeolocation.start(); //triggers start on start event
-    //   // }
-    // });
+      if (!status.isRunning) {
+        BackgroundGeolocation.start(); //triggers start on start event
+      }
+
+    });
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
