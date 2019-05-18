@@ -54,7 +54,8 @@ export default class Driver extends Component {
       }
     });
 
-    navigator.geolocation.getCurrentPosition(
+    // navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.watchPosition(
       (position) => {
         this.setState({
           latitude: position.coords.latitude,
