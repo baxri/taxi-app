@@ -87,7 +87,6 @@ export default class Passenger extends Component {
             pointCoords.push(driverLocation);
             this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
         });
-
     }
 
     render() {

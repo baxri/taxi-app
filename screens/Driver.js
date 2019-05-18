@@ -120,17 +120,17 @@ export default class Driver extends Component {
     // });
 
     this.socket.emit("driverLocation", {
-      latitude: location.latitude,
-      longitude: location.longitute,
+      latitude: this.state.latitude,
+      longitude: this.state.longitute,
     });
 
-    const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
+    // const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
 
-    if (Platform.OS == 'ios') {
-      Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
-    } else {
-      Linking.openURL(`https://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`);
-    }
+    // if (Platform.OS == 'ios') {
+    //   Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
+    // } else {
+    //   Linking.openURL(`https://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`);
+    // }
   }
 
   render() {
