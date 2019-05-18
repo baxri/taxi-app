@@ -29,7 +29,7 @@ export default class Passenger extends Component {
 
     componentDidMount() {
         // navigator.geolocation.getCurrentPosition(
-        navigator.geolocation.watchPosition(
+        this.watchID = navigator.geolocation.watchPosition(
             (position) => {
                 this.setState({
                     latitude: position.coords.latitude,
@@ -42,6 +42,10 @@ export default class Passenger extends Component {
             { enableHighAccuracy: true, timeout: 30000 }
         )
 
+    }
+
+    componentWillUnmount() {
+        navigator.geolocation.clearWatch(this.watchID);
     }
 
 

@@ -55,7 +55,7 @@ export default class Driver extends Component {
     });
 
     // navigator.geolocation.getCurrentPosition(
-    navigator.geolocation.watchPosition(
+      this.watchID = navigator.geolocation.watchPosition(
       (position) => {
         this.setState({
           latitude: position.coords.latitude,
@@ -67,6 +67,10 @@ export default class Driver extends Component {
       { enableHighAccuracy: true, timeout: 30000 }
     )
   }
+
+  componentWillUnmount() {
+    navigator.geolocation.clearWatch(this.watchID);
+}
 
   getRouteDirection = async (placeId) => {
     try {
@@ -100,25 +104,25 @@ export default class Driver extends Component {
 
   acceptPassenger = async () => {
 
-    BackgroundGeolocation.on('location', (location) => {
-      this.socket.emit("driverLocation", {
-        latitude: location.latitude,
-        longitude: location.longitute,
-      });
-    });
-
-    BackgroundGeolocation.checkStatus(status => {
-      // you don't need to check status before start (this is just the example)
-      // alert("checkStatus!");
-      if (!status.isRunning) {
-        BackgroundGeolocation.start(); //triggers start on start event
-      }
-    });
-
-    // this.socket.emit("driverLocation", {
-    //   latitude: this.state.latitude,
-    //   longitude: this.state.longitute,
+    // BackgroundGeolocation.on('location', (location) => {
+    //   this.socket.emit("driverLocation", {
+    //     latitude: location.latitude,
+    //     longitude: location.longitute,
+    //   });
     // });
+
+    // BackgroundGeolocation.checkStatus(status => {
+    //   // you don't need to check status before start (this is just the example)
+    //   // alert("checkStatus!");
+    //   if (!status.isRunning) {
+    //     BackgroundGeolocation.start(); //triggers start on start event
+    //   }
+    // });
+
+    this.socket.emit("driverLocation", {
+      latitude: this.state.latitude,
+      longitude: this.state.longitute,
+    });
 
     // const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
 
