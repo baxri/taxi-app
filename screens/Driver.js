@@ -75,7 +75,6 @@ export default class Driver extends Component {
       (error) => { this.setState({ error: error.message }) },
       { enableHighAccuracy: true, timeout: 30000 }
     )
-
   }
 
   getRouteDirection = async (placeId) => {
