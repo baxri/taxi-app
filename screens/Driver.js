@@ -111,6 +111,7 @@ export default class Driver extends Component {
     //   });
     // });
 
+    
     // BackgroundGeolocation.checkStatus(status => {
     //   // you don't need to check status before start (this is just the example)
     //   // alert("checkStatus!");
