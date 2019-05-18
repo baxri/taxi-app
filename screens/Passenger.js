@@ -28,7 +28,8 @@ export default class Passenger extends Component {
     }
 
     componentDidMount() {
-        navigator.geolocation.getCurrentPosition(
+        // navigator.geolocation.getCurrentPosition(
+        navigator.geolocation.watchPosition(
             (position) => {
                 this.setState({
                     latitude: position.coords.latitude,
