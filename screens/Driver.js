@@ -7,8 +7,9 @@ import _ from 'lodash';
 import PolyLine from '@mapbox/polyline';
 import socketIO from "socket.io-client";
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
+import GenericContainer from "../components/GenericContainer";
 
-export default class Driver extends Component {
+class Driver extends Component {
 
   constructor(props) {
     super(props)
@@ -55,7 +56,7 @@ export default class Driver extends Component {
     });
 
     // navigator.geolocation.getCurrentPosition(
-      this.watchID = navigator.geolocation.watchPosition(
+    this.watchID = navigator.geolocation.watchPosition(
       (position) => {
         this.setState({
           latitude: position.coords.latitude,
@@ -70,7 +71,7 @@ export default class Driver extends Component {
 
   componentWillUnmount() {
     navigator.geolocation.clearWatch(this.watchID);
-}
+  }
 
   getRouteDirection = async (placeId) => {
     try {
@@ -111,7 +112,7 @@ export default class Driver extends Component {
     //   });
     // });
 
-    
+
     // BackgroundGeolocation.checkStatus(status => {
     //   // you don't need to check status before start (this is just the example)
     //   // alert("checkStatus!");
@@ -221,3 +222,5 @@ const styles = StyleSheet.create({
   },
 
 });
+
+export default GenericContainer(Driver);

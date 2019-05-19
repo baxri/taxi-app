@@ -6,15 +6,16 @@ import axios from 'axios';
 import _ from 'lodash';
 import PolyLine from '@mapbox/polyline';
 import socketIO from "socket.io-client";
+import GenericContainer from "../components/GenericContainer";
 
-export default class Passenger extends Component {
+class Passenger extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
-            latitude: 0,
-            longitute: 0,
+            latitude: this.props.latitude,
+            longitute: this.props.longitude,
             error: "",
             destination: "",
             predictions: [],
@@ -26,28 +27,6 @@ export default class Passenger extends Component {
             routeResponse: null,
         }
     }
-
-    componentDidMount() {
-        // navigator.geolocation.getCurrentPosition(
-        this.watchID = navigator.geolocation.watchPosition(
-            (position) => {
-                this.setState({
-                    latitude: position.coords.latitude,
-                    longitute: position.coords.longitude,
-
-                    error: null,
-                })
-            },
-            (error) => { this.setState({ error: error.message }) },
-            { enableHighAccuracy: true, timeout: 30000 }
-        )
-
-    }
-
-    componentWillUnmount() {
-        navigator.geolocation.clearWatch(this.watchID);
-    }
-
 
     onChangeDestination = async (destination) => {
 
@@ -194,3 +173,5 @@ const styles = StyleSheet.create({
     },
 
 });
+
+export default GenericContainer(Passenger);
