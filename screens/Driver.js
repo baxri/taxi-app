@@ -15,14 +15,10 @@ class Driver extends Component {
     super(props)
 
     this.state = {
-      latitude: 0,
-      longitute: 0,
       error: "",
-      pointCoords: [],
       lookingForPassengers: false,
       buttonText: "FIND PASSENGER",
       passengerFound: false,
-      socket: null,
     }
   }
 
@@ -42,7 +38,6 @@ class Driver extends Component {
       stopOnStillActivity: false,
     });
 
-
     BackgroundGeolocation.on('authorization', (status) => {
       console.log('[INFO] BackgroundGeolocation authorization status: ' + status);
       if (status !== BackgroundGeolocation.AUTHORIZED) {
@@ -54,36 +49,6 @@ class Driver extends Component {
           ]), 1000);
       }
     });
-
-    // navigator.geolocation.getCurrentPosition(
-    this.watchID = navigator.geolocation.watchPosition(
-      (position) => {
-        this.setState({
-          latitude: position.coords.latitude,
-          longitute: position.coords.longitude,
-          error: null,
-        })
-      },
-      (error) => { this.setState({ error: error.message }) },
-      { enableHighAccuracy: true, timeout: 30000 }
-    )
-  }
-
-  componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID);
-  }
-
-  getRouteDirection = async (placeId) => {
-    try {
-      const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitute}&destination=place_id:${placeId}&key=${apiKey}`;
-      const { data } = await axios.get(apiUrl);
-      const points = PolyLine.decode(data.routes[0].overview_polyline.points);
-      const pointCoords = points.map(point => { return { latitude: point[0], longitude: point[1] } });
-      this.setState({ pointCoords });
-      this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
-    } catch (err) {
-      alert(err.message)
-    }
   }
 
   lookForPassengers = async () => {
@@ -93,10 +58,10 @@ class Driver extends Component {
     this.socket = socketIO.connect("http://192.168.0.101:3000");
 
     this.socket.on("connect", () => {
-      this.socket.emit("lookingForPassengers", this.state.routeResponse);
+      this.socket.emit("lookingForPassengers");
 
       this.socket.on("taxiRequest", routeResponse => {
-        this.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
+        this.props.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
         this.setState({ lookingForPassengers: false, passengerFound: true, buttonText: "ACCEPT RIDE?" });
       });
     });
@@ -122,8 +87,8 @@ class Driver extends Component {
     // });
 
     this.socket.emit("driverLocation", {
-      latitude: this.state.latitude,
-      longitude: this.state.longitute,
+      latitude: this.props.latitude,
+      longitude: this.props.longitute,
     });
 
     // const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
@@ -140,8 +105,8 @@ class Driver extends Component {
     let marker = null;
     let bottomButtonFunction = this.lookForPassengers;
 
-    if (this.state.pointCoords.length > 0) {
-      marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
+    if (this.props.pointCoords.length > 0) {
+      marker = <Marker coordinate={this.props.pointCoords[this.props.pointCoords.length - 1]} />
     }
 
     if (this.state.passengerFound) {
@@ -158,14 +123,14 @@ class Driver extends Component {
           }}
           style={styles.map}
           region={{
-            latitude: this.state.latitude,
-            longitude: this.state.longitute,
+            latitude: this.props.latitude,
+            longitude: this.props.longitude,
             latitudeDelta: 0.1,
             longitudeDelta: 0.1 * (width / height),
           }}
           showsUserLocation={true}
         >
-          <MapView.Polyline coordinates={this.state.pointCoords} strokeWidth={4} strokeColor="red" />
+          <MapView.Polyline coordinates={this.props.pointCoords} strokeWidth={4} strokeColor="red" />
           {marker}
         </MapView>
 

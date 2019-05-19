@@ -4,7 +4,6 @@ import MapView, { Marker } from 'react-native-maps';
 import apiKey from '../apiKey';
 import axios from 'axios';
 import _ from 'lodash';
-import PolyLine from '@mapbox/polyline';
 import socketIO from "socket.io-client";
 import GenericContainer from "../components/GenericContainer";
 
@@ -14,17 +13,15 @@ class Passenger extends Component {
         super(props)
 
         this.state = {
-            latitude: this.props.latitude,
-            longitute: this.props.longitude,
             error: "",
             destination: "",
             predictions: [],
-            pointCoords: [],
+            // pointCoords: [],
 
             lookingForDriver: false,
             driverIsOnTheWay: false,
             driverLocation: { latitude: 0, longitude: 0 },
-            routeResponse: null,
+            // routeResponse: null,
         }
     }
 
@@ -32,7 +29,7 @@ class Passenger extends Component {
 
         this.setState({ destination });
 
-        const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&sessiontoken=1234567890&location=${this.state.latitude},${this.state.longitute}&radius=2`;
+        const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&sessiontoken=1234567890&location=${this.props.latitude},${this.props.longitute}&radius=2`;
         const { data } = await axios.get(apiUrl);
 
         this.setState({
@@ -40,19 +37,10 @@ class Passenger extends Component {
         })
     }
 
-    getRouteDirection = async (placeId, description) => {
-        try {
-            const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitute}&destination=place_id:${placeId}&key=${apiKey}`;
-            const { data } = await axios.get(apiUrl);
-            const points = PolyLine.decode(data.routes[0].overview_polyline.points);
-            const pointCoords = points.map(point => { return { latitude: point[0], longitude: point[1] } });
-            this.setState({ pointCoords, predictions: [], destination: description, routeResponse: data });
-            Keyboard.dismiss();
-
-            this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
-        } catch (err) {
-            alert(err.message)
-        }
+    getDirections = async (placeId, description) => {
+        await this.props.getRouteDirection(placeId);
+        this.setState({ predictions: [], destination: description });
+        this.map.fitToCoordinates(this.props.pointCoords, { edgePadding: { top: 100, right: 20, left: 20, bottom: 100 } });
     }
 
     requestDriver = async () => {
@@ -62,12 +50,12 @@ class Passenger extends Component {
         const socket = socketIO.connect("http://192.168.0.101:3000");
 
         socket.on("connect", () => {
-            socket.emit("taxiRequest", this.state.routeResponse);
+            socket.emit("taxiRequest", this.props.routeResponse);
         });
 
         socket.on("driverLocation", driverLocation => {
             this.setState({ lookingForDriver: false, driverIsOnTheWay: true, driverLocation });
-            let pointCoords = [...this.state.pointCoords];
+            let pointCoords = [...this.props.pointCoords];
             pointCoords.push(driverLocation);
             this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
         });
@@ -79,8 +67,8 @@ class Passenger extends Component {
         let markerDriver = null;
         let driverButton = null;
 
-        if (this.state.pointCoords.length > 0) {
-            marker = <Marker coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]} />
+        if (this.props.pointCoords.length > 0) {
+            marker = <Marker coordinate={this.props.pointCoords[this.props.pointCoords.length - 1]} />
             driverButton = <TouchableOpacity onPress={() => this.requestDriver()} style={styles.bottomButton}>
                 <Text style={styles.bottomButtonText}>FREQUEST</Text>
                 <ActivityIndicator animating={this.state.lookingForDriver} size="large" />
@@ -93,7 +81,7 @@ class Passenger extends Component {
             </Marker>
         }
 
-        const predictions = this.state.predictions.map(prediction => <TouchableHighlight onPress={() => this.getRouteDirection(prediction.place_id, prediction.structured_formatting.main_text)} key={prediction.id}>
+        const predictions = this.state.predictions.map(prediction => <TouchableHighlight onPress={() => this.getDirections(prediction.place_id, prediction.structured_formatting.main_text)} key={prediction.id}>
             <View>
                 <Text style={styles.suggestions}>{prediction.description}</Text>
             </View>
@@ -101,6 +89,8 @@ class Passenger extends Component {
 
 
         const { width, height } = Dimensions.get('window');
+
+        console.log(this.props.latitude, this.props.longitude);
 
         return (
             <View style={styles.container}>
@@ -110,18 +100,17 @@ class Passenger extends Component {
                     }}
                     style={styles.map}
                     region={{
-                        latitude: this.state.latitude,
-                        longitude: this.state.longitute,
+                        latitude: this.props.latitude,
+                        longitude: this.props.longitude,
                         latitudeDelta: 0.1,
                         longitudeDelta: 0.1 * (width / height),
                     }}
                     showsUserLocation={true}
                 >
-                    <MapView.Polyline coordinates={this.state.pointCoords} strokeWidth={4} strokeColor="red" />
+                    <MapView.Polyline coordinates={this.props.pointCoords} strokeWidth={4} strokeColor="red" />
                     {marker}
                     {markerDriver}
                 </MapView>
-                {/* <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={_.debounce(this.onChangeDestination, 1000)} /> */}
                 <TextInput style={styles.destinationInput} placeholder="Enter location" value={this.state.destination} onChangeText={this.onChangeDestination} />
                 {predictions}
                 {driverButton}
