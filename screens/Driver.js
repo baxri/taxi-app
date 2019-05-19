@@ -61,7 +61,7 @@ class Driver extends Component {
       this.socket.emit("lookingForPassengers");
 
       this.socket.on("taxiRequest", routeResponse => {
-        await this.props.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
+        this.props.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
         this.setState({ lookingForPassengers: false, passengerFound: true, buttonText: "ACCEPT RIDE?" });
       });
     });
@@ -92,7 +92,7 @@ class Driver extends Component {
       longitude: this.props.longitude,
     });
 
-    const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
+    const passengerLocation = this.props.pointCoords[this.props.pointCoords.length - 1];
 
     if (Platform.OS == 'ios') {
       Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
