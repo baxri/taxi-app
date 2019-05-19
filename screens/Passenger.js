@@ -57,7 +57,7 @@ class Passenger extends Component {
             this.setState({ lookingForDriver: false, driverIsOnTheWay: true, driverLocation });
             let pointCoords = [...this.props.pointCoords];
             pointCoords.push(driverLocation);
-            this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 50, right: 30, left: 30 } });
+            this.map.fitToCoordinates(pointCoords, { edgePadding: { top: 100, right: 20, left: 20, bottom: 100 } });
         });
     }
 

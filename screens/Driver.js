@@ -61,7 +61,7 @@ class Driver extends Component {
       this.socket.emit("lookingForPassengers");
 
       this.socket.on("taxiRequest", routeResponse => {
-        this.props.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
+        await this.props.getRouteDirection(routeResponse.geocoded_waypoints[0].place_id);
         this.setState({ lookingForPassengers: false, passengerFound: true, buttonText: "ACCEPT RIDE?" });
       });
     });
@@ -86,18 +86,19 @@ class Driver extends Component {
     //   }
     // });
 
+
     this.socket.emit("driverLocation", {
       latitude: this.props.latitude,
-      longitude: this.props.longitute,
+      longitude: this.props.longitude,
     });
 
-    // const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
+    const passengerLocation = this.state.pointCoords[this.state.pointCoords.length - 1];
 
-    // if (Platform.OS == 'ios') {
-    //   Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
-    // } else {
-    //   Linking.openURL(`https://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`);
-    // }
+    if (Platform.OS == 'ios') {
+      Linking.openURL(`http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`);
+    } else {
+      Linking.openURL(`geo:0,0?q=${passengerLocation.latitude},${passengerLocation.longitude}(Passenger)`);
+    }
   }
 
   render() {
