@@ -87,7 +87,6 @@ class Passenger extends Component {
             </View>
         </TouchableHighlight>);
 
-
         const { width, height } = Dimensions.get('window');
 
         console.log(this.props.latitude, this.props.longitude);
