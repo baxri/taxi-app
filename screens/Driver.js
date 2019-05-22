@@ -13,10 +13,6 @@ import {
     Alert
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
-import apiKey from '../apiKey';
-import axios from 'axios';
-import _ from 'lodash';
-import PolyLine from '@mapbox/polyline';
 import socketIO from "socket.io-client";
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 import GenericContainer from "../components/GenericContainer";
