@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
 
+
+
 class LoginForm extends Component {
     render() {
         return (
@@ -10,21 +12,25 @@ class LoginForm extends Component {
                            placeholder="Your@email.com"
                            autoCapitalize="none"
                            autoCorrect={false}
+                           value={this.props.email}
+                           onChangeText={email => this.props.handleChange("email", email)}
                 />
                 <TextInput style={styles.input}
                            placeholder="Password"
                            secureTextEntry
                            autoCapitalize="none"
                            autoCorrect={false}
+                           value={this.props.password}
+                           onChangeText={password => this.props.handleChange("password", password)}
                 />
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={this.props.handleSignIn}>
                     <Text style={styles.buttonText}>
                         Sign In
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={this.props.handleSignUp}>
                     <Text style={styles.buttonText}>
                         Create Account
                     </Text>
