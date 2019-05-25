@@ -1,20 +1,10 @@
 const express = require("express");
-const User = require("../models/User");
-
 const router = express.Router();
 
-router.get("/", (req, res) => {
-    res.send("You fetched user");
-});
+const UserController = require("../controllers/users");
 
-router.post("/", async (req, res) => {
-    try {
-        const user = new User(req.body);
-        await user.save();
-        res.json(user);
-    } catch (err) {
-        res.json(err);
-    }
-});
+router.get("/", UserController.getUser);
+router.post("/", UserController.createUser);
+router.post("/login", UserController.loginUser);
 
 module.exports = router;
