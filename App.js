@@ -13,7 +13,7 @@ export default class App extends Component {
         this.state = {
             isDriver: false,
             isPassenger: false,
-            token: 'dssdfsd',
+            token: null,
         }
     }
 
@@ -41,11 +41,11 @@ export default class App extends Component {
             <View style={styles.container}>
 
                 <TouchableOpacity style={[styles.choiseContainer, {borderBottomWidth: 0.5}]}
-                      onPress={() => this.setState({isPassenger: true})}>
+                      onPress={() => this.setState({isDriver: true})}>
                     <Text style={styles.selectionText}>I'm a driver</Text>
                     <Image source={require('./images/taxi.png')} style={styles.selectionImage}/>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.choiseContainer} onPress={() => this.setState({isDriver: true})}>
+                <TouchableOpacity style={styles.choiseContainer} onPress={() => this.setState({isPassenger: true})}>
                     <Text style={styles.selectionText}>I'm a passenger</Text>
                     <Image source={require('./images/taxi.png')} style={styles.selectionImage}/>
                 </TouchableOpacity>

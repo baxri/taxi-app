@@ -63,7 +63,7 @@ class Driver extends Component {
 
         this.setState({lookingForPassengers: true});
 
-        this.socket = socketIO.connect("http://192.168.0.101:3000");
+        this.socket = socketIO.connect("http://192.168.0.111:3000");
 
         this.socket.on("connect", () => {
             this.socket.emit("lookingForPassengers");

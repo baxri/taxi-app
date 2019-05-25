@@ -47,7 +47,7 @@ class Passenger extends Component {
 
         this.setState({ lookingForDriver: true });
 
-        const socket = socketIO.connect("http://192.168.0.101:3000");
+        const socket = socketIO.connect("http://192.168.0.111:3000");
 
         socket.on("connect", () => {
             socket.emit("taxiRequest", this.props.routeResponse);
