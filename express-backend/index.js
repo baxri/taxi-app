@@ -1,8 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
 const port = 4000;
 const app = express();
+
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.json());
 
 const User = require("./models/User");
 
@@ -20,10 +24,8 @@ mongoose.connect(mongoDbConnectionString, {useNewUrlParser: true}).then(result =
     });
 
     app.post('/user', async (req, res) => {
-
-        const user = new User();
+        const user = new User(req.body);
         await user.save();
-
         res.send("User created!");
     });
 
