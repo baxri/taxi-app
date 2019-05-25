@@ -24,9 +24,13 @@ mongoose.connect(mongoDbConnectionString, {useNewUrlParser: true}).then(result =
     });
 
     app.post('/user', async (req, res) => {
-        const user = new User(req.body);
-        await user.save();
-        res.send("User created!");
+        try {
+            const user = new User(req.body);
+            await user.save();
+            res.json(user);
+        } catch (err) {
+            res.json(err);
+        }
     });
 
 }).catch(error => {
