@@ -14,7 +14,6 @@ class Login extends Component {
         this.state = {
             email: "giorgi.bibilashvili89@gmail.com",
             password: "gio123456",
-            error: ""
         }
     }
 
@@ -25,9 +24,8 @@ class Login extends Component {
     handleSignIn = async () => {
         try {
             const {email, password} = this.state;
-
             const {data} = await axios.post("/users/login", {email, password});
-            Alert.alert(data.token);
+            this.props.handleTokenChange(data.token);
         } catch (err) {
             Alert.alert(err.response.data.message);
         }
@@ -36,9 +34,7 @@ class Login extends Component {
     handleSignUp = async () => {
         try {
             const {email, password} = this.state;
-
             await axios.post("/users", {email, password});
-
             this.handleSignIn();
         } catch (err) {
             Alert.alert(err.response.data.message);
@@ -48,12 +44,15 @@ class Login extends Component {
     render() {
         return (
             <View style={styles.container}>
-                {/*<Text style={styles.headerText}>TaxiApp</Text>*/}
-                <Image source={require('../images/taxi.png')} style={styles.logo} />
+                <Image source={require('../images/taxi.png')} style={styles.logo}/>
+                <LoginForm
+                    email={this.state.email}
+                    password={this.state.password}
 
-                <LoginForm email={this.state.email} password={this.state.password} handleChange={this.handleChange}
-                           handleSignIn={this.handleSignIn} handleSignUp={this.handleSignUp}/>
-
+                    handleChange={this.handleChange}
+                    handleSignIn={this.handleSignIn}
+                    handleSignUp={this.handleSignUp}
+                />
             </View>
         );
     }
