@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.getUser = (req, res) => {
     res.send("You fetched user");
@@ -21,10 +22,14 @@ exports.loginUser = async (req, res) => {
             throw new Error("Invalid password!");
         }
 
-        res.json(user)
+        const token = jwt.sign({...user}, 'secretKey');
+
+        res.json({
+            token
+        })
     } catch (err) {
         res.status(500).json({
-            "message": err.message
+            message: err.message
         });
     }
 };
@@ -36,7 +41,7 @@ exports.createUser = async (req, res) => {
 
         const userinDatabase = await User.findOne({email});
 
-        if( userinDatabase ){
+        if (userinDatabase) {
             return res.json(userinDatabase);
         }
 
@@ -49,7 +54,7 @@ exports.createUser = async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(500).json({
-            "message": err.message
+            message: err.message
         });
     }
 };
