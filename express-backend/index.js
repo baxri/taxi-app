@@ -16,6 +16,7 @@ mongoose.connect(mongoDbConnectionString, {useNewUrlParser: true}).then(result =
     console.log(error);
 });
 
+
 app.get('/user', (req, res) => {
     res.send("You fetched user");
 });
